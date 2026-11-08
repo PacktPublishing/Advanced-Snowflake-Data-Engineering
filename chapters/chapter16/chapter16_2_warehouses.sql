@@ -2,7 +2,7 @@
 -- Execute the named blocks in order and STOP ON ERROR.
 -- Prerequisites: setup role, warehouse, database, and fixture tables.
 -- Validation: live tested on Snowflake 10.33.101, 2026-09-21. Idle-policy block
--- added 2026-09-29, rerun pending; see README.
+-- added 2026-09-29, IF NOT EXISTS added 2026-11-06, rerun pending; see README.
 -- Reader-specific substitutions use <REPLACE: description>.
 -- Roles: SYSADMIN alters OPS_WH, which it owns; ACCOUNTADMIN creates the monitor.
 
@@ -12,7 +12,7 @@ ALTER WAREHOUSE OPS_WH SET AUTO_SUSPEND = 60;
 
 -- DAILY MONITOR: only ACCOUNTADMIN can create resource monitors.
 USE ROLE ACCOUNTADMIN;
-CREATE RESOURCE MONITOR DAILY_RM
+CREATE RESOURCE MONITOR IF NOT EXISTS DAILY_RM
   WITH CREDIT_QUOTA = 10
        FREQUENCY = DAILY
        START_TIMESTAMP = IMMEDIATELY

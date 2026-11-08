@@ -2,7 +2,8 @@
 -- Execute the named blocks in order and STOP ON ERROR.
 -- Prerequisites: setup role, warehouse, database, and fixture tables.
 -- Validation: live tested on Snowflake 10.33.101, 2026-09-21. Attribution block
--- simplified 2026-09-29, rerun pending; see README.
+-- simplified 2026-09-29; sample_query_id and MEASUREMENT block added 2026-11-06,
+-- rerun pending; see README.
 -- Reader-specific substitutions use <REPLACE: description>.
 -- Role: OPS_ENGINEER for lab work; explicit administrator blocks only where needed.
 
@@ -21,7 +22,8 @@ ORDER BY usage_date, billed_credits DESC;
 SELECT COALESCE(NULLIF(query_tag, ''), '(untagged)') AS workload,
        query_parameterized_hash,
        COUNT(*) AS attributed_executions,
-       SUM(credits_attributed_compute) AS query_credits
+       SUM(credits_attributed_compute) AS query_credits,
+       MAX_BY(query_id, credits_attributed_compute) AS sample_query_id
 FROM snowflake.account_usage.query_attribution_history
 WHERE start_time >= DATEADD(day, -8, CURRENT_DATE())
   AND start_time < DATEADD(day, -1, CURRENT_DATE())
@@ -41,3 +43,15 @@ WHERE query_metering_hour >= DATEADD(day, -8, CURRENT_DATE())
 GROUP BY query_id
 ORDER BY metered_credits DESC
 LIMIT 20;
+
+-- MEASUREMENT: credits per execution per day for one family, before and after a
+-- change that keeps the SQL text (clustering key, warehouse size). A change to the
+-- SQL text produces a new hash; find it with the attribution block above.
+SELECT TO_DATE(start_time) AS run_day,
+       COUNT(*) AS executions,
+       SUM(credits_attributed_compute) / COUNT(*) AS credits_per_execution
+FROM snowflake.account_usage.query_attribution_history
+WHERE query_parameterized_hash = '<REPLACE: query_parameterized_hash>'
+  AND start_time >= DATEADD(day, -8, CURRENT_DATE())
+GROUP BY run_day
+ORDER BY run_day;
