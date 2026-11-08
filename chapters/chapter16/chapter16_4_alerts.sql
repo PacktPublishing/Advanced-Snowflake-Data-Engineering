@@ -1,7 +1,8 @@
 -- Chapter 16: Implementing alerting. Independent after chapter16_0_setup.sql.
 -- Execute the named blocks in order and STOP ON ERROR.
 -- Prerequisites: setup role, warehouse, database, and fixture tables.
--- Validation: live tested on Snowflake 10.33.101, 2026-09-21; see README.
+-- Validation: live tested on Snowflake 10.33.101, 2026-09-21. OR REPLACE added
+-- 2026-11-06, rerun pending; see README.
 -- Reader-specific substitutions use <REPLACE: description>.
 -- Role: OPS_ENGINEER for lab work; explicit administrator blocks only where needed.
 
@@ -9,10 +10,10 @@ USE ROLE OPS_ENGINEER;
 USE WAREHOUSE OPS_WH;
 ALTER SESSION SET TIMEZONE = 'UTC';
 
--- CONDITION AND ALERT DEFINITIONS: run once.
+-- CONDITION AND ALERT DEFINITIONS: OR REPLACE makes the block re-runnable.
 USE ROLE OPS_ENGINEER;
 USE WAREHOUSE OPS_WH;
-CREATE VIEW OPS_DB.MONITORING.STALE_PIPELINES AS
+CREATE OR REPLACE VIEW OPS_DB.MONITORING.STALE_PIPELINES AS
 SELECT 'settlement' AS pipeline_name,
        MAX(last_success_at) AS last_success_at,
        COALESCE(TO_VARCHAR(MAX(last_success_at),
@@ -22,7 +23,7 @@ WHERE pipeline_name = 'settlement'
 HAVING MAX(last_success_at) IS NULL
     OR MAX(last_success_at) < DATEADD(minute, -15, SYSDATE());
 
-CREATE ALERT OPS_DB.MONITORING.SETTLEMENT_STALE
+CREATE OR REPLACE ALERT OPS_DB.MONITORING.SETTLEMENT_STALE
   SCHEDULE = '5 MINUTE'
   IF (EXISTS (SELECT 1 FROM OPS_DB.MONITORING.STALE_PIPELINES))
   THEN MERGE INTO OPS_DB.MONITORING.INCIDENT_LOG t

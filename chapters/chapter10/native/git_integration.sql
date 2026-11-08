@@ -19,7 +19,7 @@ CREATE OR REPLACE API INTEGRATION techflow_git_api
 
 CREATE OR REPLACE GIT REPOSITORY techflow_repo
     API_INTEGRATION = techflow_git_api
-    ORIGIN = 'https://github.com/PacktPublishing/Advanced-Data-Engineering-with-Snowflake.git';
+    ORIGIN = 'https://github.com/PacktPublishing/Advanced-Snowflake-Data-Engineering.git';
 
 -- ---------------------------------------------------------------------
 -- PRIVATE-REPO ALTERNATIVE (uncomment and set your own token/username)
@@ -40,7 +40,7 @@ CREATE OR REPLACE GIT REPOSITORY techflow_repo
 -- CREATE OR REPLACE GIT REPOSITORY techflow_repo
 --     API_INTEGRATION = techflow_git_api
 --     GIT_CREDENTIALS = techflow_git_secret
---     ORIGIN = 'https://github.com/PacktPublishing/Advanced-Data-Engineering-with-Snowflake.git';
+--     ORIGIN = 'https://github.com/PacktPublishing/Advanced-Snowflake-Data-Engineering.git';
 
 SHOW GIT REPOSITORIES LIKE 'techflow_repo';
 

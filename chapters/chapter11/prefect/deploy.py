@@ -19,7 +19,7 @@ from prefect.schedules import Cron
 
 REPOSITORY_URL = (
     "https://github.com/PacktPublishing/"
-    "Advanced-Data-Engineering-with-Snowflake.git"
+    "Advanced-Snowflake-Data-Engineering.git"
 )
 ENTRYPOINT = "chapters/chapter11/prefect/transform.py:techflow_transform"
 DEPLOYMENT_NAME = "techflow-nightly"

@@ -92,16 +92,9 @@ Executed on 8 September 2026 against the Snowflake CLI `book` connection, using 
 
 ## Scheduled incident evidence
 
-All timestamps below are UTC. Each wait requires a scheduled time and measurement time after its corresponding insert/delete boundary.
+Each wait requires a scheduled time and a measurement time after its insert or delete boundary. Two cycles ran: the orphan count went from 1 (violated) to 0 (recovered), then the same pair ran again after notifications were enabled.
 
-| Cycle | State | Scheduled time | Measurement time | Orphan value / violated |
-|---|---|---|---|---|
-| First | Failed | 15:30:00 | 15:30:23.080 | 1 / TRUE |
-| First | Recovered | 15:35:00 | 15:35:51.214 | 0 / FALSE |
-| Notifications enabled | Failed | 15:40:00 | 15:41:00.032 | 1 / TRUE |
-| Notifications enabled | Recovered | 15:45:00 | 15:45:54.419 | 0 / FALSE |
-
-Both bounded wait calls returned successfully in each cycle. The first notification configuration failed because the classifier had masked the stored recipient, producing an invalid address. After the owner-only direct policy was added, configuration succeeded and the second incident produced the confirmed email. The user also confirmed the address was verified. NOTIFICATION_HISTORY did not return a native quality-notification record in this run; inbox content supplied the delivery evidence.
+Both bounded wait calls returned successfully in each cycle. The first notification configuration failed because the classifier had masked the stored recipient, producing an invalid address. After the owner-only direct policy was added, configuration succeeded and the second incident produced the confirmed email. NOTIFICATION_HISTORY did not return a native quality-notification record in this run; inbox content supplied the delivery evidence.
 
 ## Corrections made during live execution
 
@@ -123,13 +116,13 @@ The manuscript and all 34 SQL/prompt excerpts pass the offline alignment checks.
 
 ## CoCo prompt results
 
-The lab was rebuilt from scripts 0–3 plus the documentation SQL through the new-column step. Scheduled incidents from the earlier completed SQL run supplied the historical audit evidence; no new incident or email was needed. The fresh Cortex session was `84caa848-8db1-4132-8f6e-997e4497edd0`.
+The lab was rebuilt from scripts 0–3 plus the documentation SQL through the new-column step. Scheduled incidents from the earlier completed SQL run supplied the historical audit evidence; no new incident or email was needed.
 
 | Scenario | Observed result and correction |
 |---|---|
 | Documentation generation and maintenance | Found four missing comments. The initial draft included unverified foreign-key and timestamp meanings, so the prompt now excludes unresolved meanings from executable SQL. The revised draft contained only the supplied PROCESSING_CHANNEL definition. After the reviewed comment was applied through SnowCLI, CoCo re-queried metadata, confirmed the exact comment and unchanged grain, and reported the other three gaps separately. |
 | Policy drafting | Produced a NUMBER(5,2) masking policy with IS_ROLE_IN_SESSION('CH15_PII_READER'), an explicit NULL branch, and column attachment. Proposed tests disable secondary roles. CoCo correctly identified that the real PII context sees zero fact rows because of the row policy. The draft was reviewed, not applied; its positive branch cannot be verified through this fact table without a separately authorized entitlement. No grants or entitlement changes were executed. |
 | Classification review | The first attempt used table-level tag lookup and did not capture a valid pre-call column snapshot. The prompt now specifies sequential TAG_REFERENCES_ALL_COLUMNS, an options-only dry call, and an after snapshot. The repeated sequence succeeded: all six PII_CATEGORY values matched and stayed unchanged; every tag_applied flag was false. POSTAL_CODE had LOW confidence and about 0.37 coverage. Missing recommendations were not treated as proof of nonsensitivity. |
-| Quality and access audit | Initial output guessed view columns, omitted SECONDARY_ROLE_STATS, misattributed historical metrics to current objects, and misstated latency. Added and executed `chapter15_coco_audit.sql`, then repeated the CoCo audit against that evidence. It identified the latest failure at 15:41:00.032 UTC and following recovery at 15:45:54.419 UTC. Table ID 325640 was deleted at 15:52:16.414 UTC, proving those records belong to the earlier lab incarnation. Secondary-role null interpretation was explicitly corrected. |
+| Quality and access audit | Initial output guessed view columns, omitted SECONDARY_ROLE_STATS, misattributed historical metrics to current objects, and misstated latency. Added and executed `chapter15_coco_audit.sql`, then repeated the CoCo audit against that evidence. The latest failure and the following recovery belonged to an earlier lab incarnation that had already been dropped. Secondary-role null interpretation was explicitly corrected. |
 
 Independent snapshots confirmed unchanged customer tags, fact policy references, and refund grain; PROCESSING_CHANNEL was the only changed column comment. The rebuilt lab and all five roles were removed through guarded teardown, with empty final SHOW results. All four source tables retained identical row counts, data hashes, DDL, and column tags after this cleanup. Treat model narratives as reviewable drafts; the recorded SQL results are the evidence baseline.

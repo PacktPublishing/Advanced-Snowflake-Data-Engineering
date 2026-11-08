@@ -1,5 +1,6 @@
 -- Chapter 16: core lab teardown. Review each statement and STOP ON ERROR.
--- Prerequisites: core setup exists; no optional failover groups or locked backups.
+-- Prerequisites: core setup exists. Run step 8 of chapter16_6_failover.sql first if
+-- you ran the failover exercise. A locked backup set blocks dropping OPS_DB.
 -- Validation: live tested on Snowflake 10.33.101, 2026-09-21; cleanup verified.
 -- Placeholders use <REPLACE: description>; none required here.
 -- Role: SYSADMIN inherits the lab object owner; ACCOUNTADMIN removes the monitor.
@@ -17,6 +18,7 @@ USE ROLE SYSADMIN;
 DROP STREAMLIT IF EXISTS OPS_DB.MONITORING.OPERATIONS_DASHBOARD;
 DROP ALERT IF EXISTS OPS_DB.MONITORING.SETTLEMENT_STALE;
 DROP BACKUP SET IF EXISTS OPS_DB.MONITORING.LEDGER_BACKUPS;
+-- Dropping the database also removes the HOURLY_7D backup policy, views, and tables.
 DROP DATABASE OPS_DB;
 DROP WAREHOUSE OPS_WH;
 
